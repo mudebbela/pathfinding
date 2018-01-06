@@ -1,6 +1,8 @@
 function removeFromArray(arr, elt){
   for (i = arr.length; i>=0; i--){
-    arr.splice(i,1);
+    if(arr[i] === elt){
+      arr.splice(i,1);
+    }
   }
 }
 
@@ -8,8 +10,8 @@ function heuristic(a, b){
   var d = dist(a.i, a.j, b.i, b.j);
   return d;
 }
-var cols = 25;
-var rows = 25;
+var cols = 20;
+var rows = 20;
 var grid =  new Array(cols);
 
 var openSet = [];
@@ -18,6 +20,9 @@ var start;
 var end;
 var w, h;
 var path =[];
+var diagonals =true;
+var hasWalls = true;
+var wallChance = .1;
 
 
 function Spot(i,j){
@@ -31,8 +36,10 @@ function Spot(i,j){
   this.previous = undefined;
   this.wall = false;
 
-  if(random(1)< 0.1){
-    this.wall = true;
+  if (hasWalls){
+    if(random(1)< wallChance){
+      this.wall = true;
+    }
   }
 
   this.show = function(col){
@@ -47,29 +54,38 @@ function Spot(i,j){
 this.addNeighbours = function(grid){
   var i = this.i;
   var j = this.j;
+
+  if(diagonals){
+    if(j< rows - 1 && i < cols - 1){
+      this.neighbours.push(grid[i+1][j+1]);
+    }
+    if(j> 0&& i>0){
+      this.neighbours.push(grid[i-1][j-1]);
+    }
+
+    if(i>0 && j< rows - 1){
+      this.neighbours.push(grid[i-1][j+1]);
+    }
+
+    if(i<cols - 1 &&  j> 0){
+      this.neighbours.push(grid[i+1][j-1]);
+    }
+  }
   if(i< cols - 1){
     this.neighbours.push(grid[i+1][j]);
-    if(j< rows - 1){
-      //this.neighbours.push(grid[i+1][j+1]);
-    }
+
   }
   if(i>0){
     this.neighbours.push(grid[i-1][j]);
-    if(j>0){
-      //this.neighbours.push(grid[i-1][j-1]);
-    }
+
   }
   if(j<rows - 1){
     this.neighbours.push(grid[i][j+1]);
-    if(i>0){
-      //this.neighbours.push(grid[i-1][j+1]);
-    }
+
   }
   if(j > 0 ){
     this.neighbours.push(grid[i][j-1]);
-    if(i<cols - 1){
-      //this.neighbours.push(grid[i+1][j-1]);
-    }
+
 
   }
 }
@@ -78,6 +94,9 @@ this.addNeighbours = function(grid){
 
 
 function setup(){
+
+  //openSet = [];
+  //closedSet = [];
   createCanvas(400, 400);
   console.log('A');
 
@@ -104,7 +123,7 @@ function setup(){
   }
 
   start = grid[0][0];
-  end =  grid[cols -4][rows - 8];
+  end =  grid[cols-1][rows - 1];
 
   openSet.push(start);
   console.log(openSet);
@@ -129,39 +148,38 @@ function draw(){
 
     if(current === end){
       console.log("DONE");
+      end.show(color(255,255,0));
       noLoop();
-
-
     }
 
     //openSet.remove(current);
     //if only that was a thing right??
-
     removeFromArray(openSet, current);
+    console.log(openSet);
     closedSet.push(current);
 
 
     //check neighbours
     var neighbours = current.neighbours;
-    console.log(neighbours);
     for(var i=0; i< neighbours.length; i++){
-      console.log("number");
-      console.log(i);
 
       var neighbour = neighbours[i];
       if(!closedSet.includes(neighbour) && !neighbour.wall){
+        var tempg = current.g+1;
         if(!openSet.includes(neighbour)){
           openSet.push(neighbour);
-          var tempg = current.g+1;
-          if(tempg< neighbour.g){
-            neighbour.g = tempg;
-          }
+
+          neighbour.g = tempg;
           neighbour.h = heuristic(neighbour, end);
           neighbour.f = neighbour.g+ neighbour.h;
           neighbour.previous = current
         } else {
-          //it hasent been evaluated so tempg will be its new g
-          neighbour.g = tempg;
+          if(tempg< neighbour.g){
+            neighbour.g = tempg;
+            neighbour.h = heuristic(neighbour, end);
+            neighbour.f = neighbour.g+ neighbour.h;
+            neighbour.previous = current
+          }
         }
       }
 
@@ -195,6 +213,7 @@ function draw(){
     temp = temp.previous;
   }
 
+  //blue out path
   for(var i = 0; i<path.length; i++){
     path[i].show(color(0,0,255));
 
