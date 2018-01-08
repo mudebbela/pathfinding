@@ -10,8 +10,8 @@ function heuristic(a, b){
   var d = dist(a.i, a.j, b.i, b.j);
   return d;
 }
-var cols = 20;
-var rows = 20;
+var cols = 100;
+var rows = 100;
 var grid =  new Array(cols);
 
 var openSet = [];
@@ -22,7 +22,9 @@ var w, h;
 var path =[];
 var diagonals =true;
 var hasWalls = true;
-var wallChance = .1;
+var wallChance = .4;
+var showOpenSet = true;
+var showClosedSet = true;
 
 
 function Spot(i,j){
@@ -198,7 +200,7 @@ function draw(){
   }
   //red out closed nodes
   for(var i  = 0; i< closedSet.length; i++){
-    closedSet[i].show(color(255,0,0));
+    //closedSet[i].show(color(255,0,0));
   }
 
   //green out open nodes
