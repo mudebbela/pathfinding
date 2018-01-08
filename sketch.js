@@ -20,9 +20,20 @@ var start;
 var end;
 var w, h;
 var path =[];
+
+//changeable variable,
+//hopefully obvious
+
+//can we step diagonally
 var diagonals =true;
+
+//add or remove walls (for debugging)
 var hasWalls = true;
+
+//how often well have hasWalls
 var wallChance = .4;
+
+//see open or closed set blocks (debuggin and aesthetics)
 var showOpenSet = true;
 var showClosedSet = true;
 
